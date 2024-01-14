@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  register-customer
+
+  Sample SAM Template for register-customer
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+Resources:
+  PutCustomer:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/handlers
+      Handler: putCustomer.handler
+      Runtime: nodejs16.x
+      Architectures:
+      - x86_64
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomerTable
+      Environment:
+        Variables:
+          CUSTOMER_TABLE: !Ref CustomerTable
+      Events:
+        PutCustomer:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /customer
+            Method: post
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        # Sourcemap: true # Enabling source maps will create the required NODE_OPTIONS environment variables on your lambda function during sam build
+        EntryPoints: 
+        - putCustomer.ts
+
+  GetCustomerById:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/handlers
+      Handler: getCustomerById.handler
+      Runtime: nodejs16.x
+      Architectures:
+      - x86_64
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomerTable
+      Environment:
+        Variables:
+          CUSTOMER_TABLE: !Ref CustomerTable
+      Events:
+        GetCustomerById:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /customer/{id}
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        # Sourcemap: true # Enabling source maps will create the required NODE_OPTIONS environment variables on your lambda function during sam build
+        EntryPoints: 
+        - getCustomerById.ts
+
+  GetAllCustomer:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/handlers
+      Handler: getAllCustomer.handler
+      Runtime: nodejs16.x
+      Architectures:
+      - x86_64
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomerTable
+      Environment:
+        Variables:
+          CUSTOMER_TABLE: !Ref CustomerTable
+      Events:
+        GetAllCustomer:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /customer
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        # Sourcemap: true # Enabling source maps will create the required NODE_OPTIONS environment variables on your lambda function during sam build
+        EntryPoints: 
+        - getAllCustomer.ts
+
+  CustomerTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  PutCustomerAPI:
+    Description: API Gateway endpoint URL for Prod stage for Put Customer function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/customer/"
+  GetCustomerAPI:
+    Description: API Gateway endpoint URL for Prod stage for Get Customer function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/customer/"
+  GetAllCustomerAPI:
+    Description: API Gateway endpoint URL for Prod stage for Get Customer By Id function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/customer/{id}"
