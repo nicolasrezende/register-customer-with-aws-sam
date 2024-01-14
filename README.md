@@ -3,7 +3,7 @@
 Exemplo prático utilizando o AWS SAM - Serverless Application Model. Criando um cadastro de clientes simples e totalmente serverless utilizando os serviços: API Gateway, Lambda e DynamoDB.
 
 ## Desenho da solução
-![Alt text here](./docs/serveless_arch.svg)
+![Serverless arch](./docs/serveless_arch.svg)
 
 ## Executando o projeto localmente
 
